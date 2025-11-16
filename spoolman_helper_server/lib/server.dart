@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:spoolman_helper_server/src/birthday_reminder.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -18,10 +20,8 @@ void run(List<String> args) async {
   pod.webServer.addRoute(RouteRoot(), '/');
   pod.webServer.addRoute(RouteRoot(), '/index.html');
   // Serve all files in the /static directory.
-  pod.webServer.addRoute(
-    RouteStaticDirectory(serverDirectory: 'static', basePath: '/'),
-    '/*',
-  );
+  final root = Directory(Uri(path: 'web/static').toFilePath());
+  pod.webServer.addRoute(StaticRoute.directory(root), '/**');
 
   // Start the server.
   await pod.start();

@@ -96,21 +96,20 @@ class _GreetingPageRiverpodExampleState
 /// Example using the simple async provider with Consumer
 /// This is a simpler pattern for one-off fetches
 class SimpleGreetingExample extends ConsumerWidget {
-  const SimpleGreetingExample({super.key, required this.name});
+  const SimpleGreetingExample({super.key, required this.userName});
 
-  final String name;
+  final String userName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the greeting provider with the name parameter
-    // This will automatically refetch when the name changes
-    final greetingAsync = ref.watch(greetingProvider(name));
+    // Watch the greeting provider with the userName parameter
+    // This will automatically refetch when the userName changes
+    final greetingAsync = ref.watch(greetingProvider(userName));
 
     return greetingAsync.when(
-      data: (response) => Text(response?.message ?? 'No message'),
+      data: (response) => Text(response.message),
       loading: () => const CircularProgressIndicator(),
       error: (error, stack) => Text('Error: $error'),
     );
   }
 }
-

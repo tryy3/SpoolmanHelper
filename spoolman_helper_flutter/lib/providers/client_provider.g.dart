@@ -6,42 +6,97 @@ part of 'client_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$serverUrlHash() => r'4b8d8b040caf7869184f21c27fd8fc19805965b9';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Provider for the server URL
+
+@ProviderFor(serverUrl)
+const serverUrlProvider = ServerUrlProvider._();
 
 /// Provider for the server URL
-///
-/// Copied from [serverUrl].
-@ProviderFor(serverUrl)
-final serverUrlProvider = Provider<String>.internal(
-  serverUrl,
-  name: r'serverUrlProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$serverUrlHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ServerUrlRef = ProviderRef<String>;
-String _$clientHash() => r'99996324ab41e9b14d9fcded4dd6a9ddb5a71287';
+final class ServerUrlProvider
+    extends $FunctionalProvider<String, String, String> with $Provider<String> {
+  /// Provider for the server URL
+  const ServerUrlProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'serverUrlProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$serverUrlHash();
+
+  @$internal
+  @override
+  $ProviderElement<String> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String create(Ref ref) {
+    return serverUrl(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String>(value),
+    );
+  }
+}
+
+String _$serverUrlHash() => r'01d42cc3bd93c909a5eab25a0678a78333d2d019';
 
 /// Provider for the Serverpod client
 /// This replaces the global client variable with a properly managed provider
-///
-/// Copied from [client].
-@ProviderFor(client)
-final clientProvider = Provider<Client>.internal(
-  client,
-  name: r'clientProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$clientHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ClientRef = ProviderRef<Client>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(client)
+const clientProvider = ClientProvider._();
+
+/// Provider for the Serverpod client
+/// This replaces the global client variable with a properly managed provider
+
+final class ClientProvider extends $FunctionalProvider<Client, Client, Client>
+    with $Provider<Client> {
+  /// Provider for the Serverpod client
+  /// This replaces the global client variable with a properly managed provider
+  const ClientProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'clientProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$clientHash();
+
+  @$internal
+  @override
+  $ProviderElement<Client> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Client create(Ref ref) {
+    return client(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Client value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Client>(value),
+    );
+  }
+}
+
+String _$clientHash() => r'b8503c8b0b6cada1161fcfff97c271574674fdc3';

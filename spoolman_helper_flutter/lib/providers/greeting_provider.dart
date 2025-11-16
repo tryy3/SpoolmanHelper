@@ -8,12 +8,12 @@ part 'greeting_provider.g.dart';
 /// This provider will automatically handle loading, error, and data states
 @riverpod
 Future<Greeting> greeting(
-  GreetingRef ref,
+  Ref ref,
   String userName,
 ) async {
   // Get the client from the client provider
   final client = ref.watch(clientProvider);
-  
+
   // Call the server endpoint
   // Riverpod will automatically handle loading and error states
   return await client.greeting.hello(userName);
@@ -33,7 +33,7 @@ class GreetingState extends _$GreetingState {
   Future<void> fetchGreeting(String name) async {
     // Set loading state
     state = const AsyncValue.loading();
-    
+
     try {
       final client = ref.read(clientProvider);
       final result = await client.greeting.hello(name);
@@ -50,4 +50,3 @@ class GreetingState extends _$GreetingState {
     state = const AsyncValue.data(null);
   }
 }
-
