@@ -82,7 +82,7 @@ final class RfidScannerProvider
   }
 }
 
-String _$rfidScannerHash() => r'040f4117e450605dcf00abd900cb3ee75648b941';
+String _$rfidScannerHash() => r'c3507192257ab326d9a7c28ad6677edc1d96f83b';
 
 /// RFID Scanner Notifier for managing scanning state and operations
 

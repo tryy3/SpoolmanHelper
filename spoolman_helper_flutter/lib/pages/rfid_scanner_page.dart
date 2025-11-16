@@ -1,15 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/rfid_scanner_provider.dart';
+import '../providers/brand_lookup_provider.dart';
+import '../widgets/tiger_tag_detail_sheet.dart';
+import '../models/tiger_tag_extensions.dart';
 
 /// Main RFID Scanner Page
-class RfidScannerPage extends ConsumerWidget {
+class RfidScannerPage extends ConsumerStatefulWidget {
   const RfidScannerPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RfidScannerPage> createState() => _RfidScannerPageState();
+}
+
+class _RfidScannerPageState extends ConsumerState<RfidScannerPage> {
+  @override
+  Widget build(BuildContext context) {
+    // Listen for newly scanned TigerTags and show the detail sheet
+    ref.listen<RfidScannerState>(
+      rfidScannerProvider,
+      (previous, next) {
+        // Check if a new tag with TigerTag data was scanned
+        if (next.lastScannedTag != null &&
+            next.lastScannedTag!.tigerTag != null &&
+            (previous?.lastScannedTag != next.lastScannedTag)) {
+          // Show the bottom sheet for the new TigerTag
+          showTigerTagDetailSheet(
+            context,
+            next.lastScannedTag!.tigerTag!,
+          );
+        }
+      },
+    );
+
     final scannerState = ref.watch(rfidScannerProvider);
     final theme = Theme.of(context);
+
+    final syncState = ref.watch(brandSyncProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -17,6 +44,7 @@ class RfidScannerPage extends ConsumerWidget {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
       ),
+      floatingActionButton: _buildSyncFab(ref, syncState, theme),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -292,17 +320,29 @@ class RfidScannerPage extends ConsumerWidget {
                   final tag = state.scannedTags[
                       state.scannedTags.length - 1 - index]; // Reverse order
                   return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: theme.colorScheme.primary,
-                      child: Icon(
-                        Icons.nfc,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
+                    leading: tag.tigerTag != null
+                        ? CircleAvatar(
+                            backgroundColor: tag.tigerTag!.primaryColor,
+                            child: Icon(
+                              Icons.fiber_manual_record,
+                              color: Colors.white,
+                            ),
+                          )
+                        : CircleAvatar(
+                            backgroundColor: theme.colorScheme.primary,
+                            child: Icon(
+                              Icons.nfc,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
                     title: Text(
-                      'UID: ${tag.uid}',
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
+                      tag.tigerTag != null
+                          ? tag.tigerTag!.getDisplayName(ref
+                              .read(brandSyncProvider.notifier)
+                              .getBrandName(tag.tigerTag!.idBrand))
+                          : 'UID: ${tag.uid}',
+                      style: TextStyle(
+                        fontFamily: tag.tigerTag != null ? null : 'monospace',
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -310,31 +350,36 @@ class RfidScannerPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 4),
-                        Text(
-                          'Type: ${tag.tagType}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                        if (tag.tigerTag != null) ...[
+                          Text(
+                            '${tag.tigerTag!.materialName} - ${tag.tigerTag!.measurementValueWithUnit}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.green.shade700,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 2),
+                        ] else
+                          Text(
+                            'Type: ${tag.tagType}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         const SizedBox(height: 4),
                         Text(
                           'Scanned: ${_formatDateTime(tag.scannedAt)}',
                           style: theme.textTheme.bodySmall,
                         ),
-                        if (tag.rawMemory != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            'Memory: ${tag.rawMemory!.length} bytes',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.green.shade700,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                     onTap: () {
-                      _showTagDetailsDialog(context, tag);
+                      // Show TigerTag detail sheet if available, otherwise show raw data dialog
+                      if (tag.tigerTag != null) {
+                        showTigerTagDetailSheet(context, tag.tigerTag!);
+                      } else {
+                        _showTagDetailsDialog(context, tag);
+                      }
                     },
                   );
                 },
@@ -513,6 +558,59 @@ class RfidScannerPage extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSyncFab(
+    WidgetRef ref,
+    BrandSyncState syncState,
+    ThemeData theme,
+  ) {
+    final isSyncing = syncState.status == BrandSyncStatus.syncing;
+
+    // Show success message when sync completes
+    ref.listen<BrandSyncState>(
+      brandSyncProvider,
+      (previous, next) {
+        if (previous?.status == BrandSyncStatus.syncing &&
+            next.status == BrandSyncStatus.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Brand database synced successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else if (next.status == BrandSyncStatus.error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(next.errorMessage ?? 'Failed to sync brands'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+    );
+
+    return FloatingActionButton(
+      onPressed: isSyncing
+          ? null
+          : () {
+              ref.read(brandSyncProvider.notifier).syncBrands();
+            },
+      tooltip: 'Sync Brand Database',
+      backgroundColor: isSyncing ? Colors.grey : theme.colorScheme.secondary,
+      child: isSyncing
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Icon(Icons.sync),
     );
   }
 }

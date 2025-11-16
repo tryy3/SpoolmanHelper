@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pages/rfid_scanner_page.dart';
 import 'providers/client_provider.dart';
+import 'providers/brand_lookup_provider.dart';
 
 void main() {
   runApp(
@@ -13,11 +14,14 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Initialize brand data on app startup
+    final brandsInitAsync = ref.watch(initializeBrandsProvider);
+
     return MaterialApp(
       title: 'Spoolman Helper',
       debugShowCheckedModeBanner: false,
@@ -28,7 +32,48 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const RfidScannerPage(),
+      home: brandsInitAsync.when(
+        data: (_) => const RfidScannerPage(),
+        loading: () => const Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Loading brand database...'),
+              ],
+            ),
+          ),
+        ),
+        error: (error, stack) => Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load brand database',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.invalidate(initializeBrandsProvider);
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

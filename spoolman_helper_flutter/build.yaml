@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      spoolman_helper_flutter|tiger_tag:
+        generate_for:
+          - lib/models/tiger_tag.dart
+builders:
+  tiger_tag:
+    import: "package:spoolman_helper_flutter/src/generators/tiger_tag_generator.dart"
+    builder_factories: ["tigerTagGeneratorFactory"]
+    build_extensions: {".dart": [".tiger_tag.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
+
