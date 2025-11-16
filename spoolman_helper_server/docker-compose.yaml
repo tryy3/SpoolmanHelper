@@ -1,0 +1,44 @@
+services:
+  # Development services
+  postgres:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "8090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: spoolman_helper
+      POSTGRES_PASSWORD: "vaGpEgrUVr1nwkCER4rt0cdZn8GkyGbx"
+    volumes:
+      - spoolman_helper_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2.6
+    ports:
+      - "8091:6379"
+    command: redis-server --requirepass "1zYEHKmfDmMRv_OM6dZs5Urws4c7lnQ8"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  # Test services
+  postgres_test:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "9090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: spoolman_helper_test
+      POSTGRES_PASSWORD: "_tbz8XB2kYvFlMemc-CkJSwSnU4Oqd2T"
+    volumes:
+      - spoolman_helper_test_data:/var/lib/postgresql/data
+
+  redis_test:
+    image: redis:6.2.6
+    ports:
+      - "9091:6379"
+    command: redis-server --requirepass "xA8Kk9OKSmmPElEqigbckGDdyIBmuXXz"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+volumes:
+  spoolman_helper_data:
+  spoolman_helper_test_data:
