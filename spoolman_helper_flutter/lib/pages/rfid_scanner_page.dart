@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spoolman_helper_flutter/providers/aspect_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/diameter_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/id_type_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/material_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/measurement_unit_lookup_provider.dart';
 import '../providers/rfid_scanner_provider.dart';
 import '../providers/brand_lookup_provider.dart';
 import '../widgets/tiger_tag_detail_sheet.dart';
@@ -104,7 +109,7 @@ class _RfidScannerPageState extends ConsumerState<RfidScannerPage> {
         Text(
           'Scan TigerTag RFID spools to manage your filament inventory',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
           textAlign: TextAlign.center,
         ),
@@ -160,7 +165,7 @@ class _RfidScannerPageState extends ConsumerState<RfidScannerPage> {
       case RfidScannerStatus.idle:
         statusText = 'Ready to scan';
         statusIcon = Icons.radio_button_unchecked;
-        statusColor = theme.colorScheme.onSurface.withOpacity(0.6);
+        statusColor = theme.colorScheme.onSurface.withValues(alpha: 0.6);
         break;
       case RfidScannerStatus.initializing:
         statusText = 'Initializing scanner...';
@@ -319,6 +324,13 @@ class _RfidScannerPageState extends ConsumerState<RfidScannerPage> {
                 itemBuilder: (context, index) {
                   final tag = state.scannedTags[
                       state.scannedTags.length - 1 - index]; // Reverse order
+
+                  final brandName = ref
+                      .read(brandSyncProvider.notifier)
+                      .getBrandName(tag.tigerTag!.idBrand);
+                  final materialName = ref
+                      .read(materialSyncProvider.notifier)
+                      .getMaterialName(tag.tigerTag!.materialID);
                   return ListTile(
                     leading: tag.tigerTag != null
                         ? CircleAvatar(
@@ -337,9 +349,7 @@ class _RfidScannerPageState extends ConsumerState<RfidScannerPage> {
                           ),
                     title: Text(
                       tag.tigerTag != null
-                          ? tag.tigerTag!.getDisplayName(ref
-                              .read(brandSyncProvider.notifier)
-                              .getBrandName(tag.tigerTag!.idBrand))
+                          ? '$brandName - $materialName'
                           : 'UID: ${tag.uid}',
                       style: TextStyle(
                         fontFamily: tag.tigerTag != null ? null : 'monospace',
@@ -352,7 +362,7 @@ class _RfidScannerPageState extends ConsumerState<RfidScannerPage> {
                         const SizedBox(height: 4),
                         if (tag.tigerTag != null) ...[
                           Text(
-                            '${tag.tigerTag!.materialName} - ${tag.tigerTag!.measurementValueWithUnit}',
+                            '$brandName - ${tag.tigerTag!.measurementValueWithUnit}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w500,
                               color: Colors.green.shade700,
@@ -598,8 +608,15 @@ class _RfidScannerPageState extends ConsumerState<RfidScannerPage> {
           ? null
           : () {
               ref.read(brandSyncProvider.notifier).syncBrands();
+              ref.read(materialSyncProvider.notifier).syncMaterials();
+              ref.read(aspectSyncProvider.notifier).syncAspects();
+              ref.read(diameterSyncProvider.notifier).syncDiameters();
+              ref.read(idTypeSyncProvider.notifier).syncIdTypes();
+              ref
+                  .read(measurementUnitSyncProvider.notifier)
+                  .syncMeasurementUnits();
             },
-      tooltip: 'Sync Brand Database',
+      tooltip: 'Sync Lookups Database',
       backgroundColor: isSyncing ? Colors.grey : theme.colorScheme.secondary,
       child: isSyncing
           ? const SizedBox(

@@ -97,13 +97,13 @@ class TigerTagGenerator extends GeneratorForAnnotation<TigerTagClass> {
           '    // Parse ${field.name} from bytes $byteStart-${byteEnd - 1} (Page ${field.page}, byte ${field.startByte}, ${field.size} bytes)');
 
       switch (field.type) {
-        case TigerTagFieldType.BigEndianInt:
+        case TigerTagFieldType.bigEndianInt:
           buffer.writeln(
               '    final ${field.name}Bytes = memory.sublist($byteStart, $byteEnd);');
           buffer.writeln(
               '    final ${field.name} = _bytesToInt(${field.name}Bytes, endian: Endian.big);');
           break;
-        case TigerTagFieldType.LittleEndianInt:
+        case TigerTagFieldType.littleEndianInt:
           buffer.writeln(
               '    final ${field.name}Bytes = memory.sublist($byteStart, $byteEnd);');
           buffer.writeln(

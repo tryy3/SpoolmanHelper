@@ -68,6 +68,7 @@ class BrandSync extends _$BrandSync {
       return;
     }
 
+    if (!ref.mounted) return;
     state = state.copyWith(
       status: BrandSyncStatus.syncing,
       errorMessage: null,
@@ -84,6 +85,7 @@ class BrandSync extends _$BrandSync {
 
       debugPrint('Brand sync completed successfully');
     } catch (e) {
+      if (!ref.mounted) return;
       debugPrint('Brand sync failed: $e');
       state = state.copyWith(
         status: BrandSyncStatus.error,

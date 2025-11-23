@@ -55,7 +55,7 @@ final class BrandLookupServiceProvider extends $FunctionalProvider<
 }
 
 String _$brandLookupServiceHash() =>
-    r'0a03056ea6c10249f5359eb4ded95b2f1b7df91b';
+    r'710703f871f2affa5f38f55f3a010c8dd1abd950';
 
 /// Provider for initializing brand data on app startup
 
@@ -93,7 +93,7 @@ final class InitializeBrandsProvider
   }
 }
 
-String _$initializeBrandsHash() => r'cdc5542706c2406fffdde83c86a2e27137e3d165';
+String _$initializeBrandsHash() => r'a244d79ac135a8750e43951bcc2daf26f703d701';
 
 /// Notifier for managing brand sync state
 
@@ -131,7 +131,7 @@ final class BrandSyncProvider
   }
 }
 
-String _$brandSyncHash() => r'80f6a413131923f96d4b7cf6a25fbd4193a8bfd0';
+String _$brandSyncHash() => r'65830bbcd37889fe5ccf65ee6d97a05b1a349bc8';
 
 /// Notifier for managing brand sync state
 

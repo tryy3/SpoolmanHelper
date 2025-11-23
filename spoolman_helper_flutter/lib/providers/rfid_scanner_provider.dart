@@ -130,8 +130,9 @@ class RfidScanner extends _$RfidScanner {
       await NfcManager.instance.startSession(
         pollingOptions: {NfcPollingOption.iso14443},
         onDiscovered: (NfcTag tag) async {
-          print("tag discovered: $tag");
+          debugPrint("tag discovered: $tag");
           _handleTagDiscovered(tag);
+          debugPrint("Foobar");
         },
       );
 
@@ -229,6 +230,8 @@ class RfidScanner extends _$RfidScanner {
 
       debugPrint(
           'TigerTag successfully processed: UID=$uid, ID=${tigerTag.tigerTagID}');
+      debugPrint("Foo");
+      stopScanning();
     } catch (e, stackTrace) {
       debugPrint('Error handling tag: $e');
       debugPrint('Stack trace: $stackTrace');

@@ -17,7 +17,7 @@ class TigerTag {
 
   /// TigerTag ID - Page 4, byte 0, 4 bytes
   @TigerTagField(
-      page: 4, startByte: 0, size: 4, type: TigerTagFieldType.BigEndianInt)
+      page: 4, startByte: 0, size: 4, type: TigerTagFieldType.bigEndianInt)
   final int tigerTagID;
 
   /// Product ID - Page 5, byte 0, 4 bytes
@@ -27,32 +27,32 @@ class TigerTag {
 
   /// Material ID - Page 6, byte 0, 2 bytes
   @TigerTagField(
-      page: 6, startByte: 0, size: 2, type: TigerTagFieldType.BigEndianInt)
+      page: 6, startByte: 0, size: 2, type: TigerTagFieldType.bigEndianInt)
   final int materialID;
 
   /// First Visual Aspect ID - Page 6, byte 2, 1 byte
   @TigerTagField(
-      page: 6, startByte: 2, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 6, startByte: 2, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int firstVisualAspectID;
 
   /// Second Visual Aspect ID - Page 6, byte 3, 1 byte
   @TigerTagField(
-      page: 6, startByte: 3, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 6, startByte: 3, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int secondVisualAspectID;
 
   /// ID Type - Page 7, byte 0, 1 byte
   @TigerTagField(
-      page: 7, startByte: 0, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 7, startByte: 0, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int idType;
 
   /// Diameter ID - Page 7, byte 1, 1 byte
   @TigerTagField(
-      page: 7, startByte: 1, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 7, startByte: 1, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int diameterID;
 
   /// ID Brand - Page 7, byte 2, 2 bytes
   @TigerTagField(
-      page: 7, startByte: 2, size: 2, type: TigerTagFieldType.BigEndianInt)
+      page: 7, startByte: 2, size: 2, type: TigerTagFieldType.bigEndianInt)
   final int idBrand;
 
   /// First Colour (RGBA) - Page 8, byte 0, 4 bytes
@@ -61,47 +61,47 @@ class TigerTag {
 
   /// Measurement Value (Unit Value) - Page 9, byte 0, 3 byte
   @TigerTagField(
-      page: 9, startByte: 0, size: 3, type: TigerTagFieldType.BigEndianInt)
+      page: 9, startByte: 0, size: 3, type: TigerTagFieldType.bigEndianInt)
   final int measurementValue;
 
   /// Measurement ID (Unit ID) - Page 9, byte 3, 1 byte
   @TigerTagField(
-      page: 9, startByte: 3, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 9, startByte: 3, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int measurementID;
 
   /// NozzleTemperatureMin - Page 10, byte 0, 2 bytes
   @TigerTagField(
-      page: 10, startByte: 0, size: 2, type: TigerTagFieldType.BigEndianInt)
+      page: 10, startByte: 0, size: 2, type: TigerTagFieldType.bigEndianInt)
   final int nozzleTemperatureMin;
 
   /// NozzleTemperatureMax - Page 10, byte 2, 2 bytes
   @TigerTagField(
-      page: 10, startByte: 2, size: 2, type: TigerTagFieldType.BigEndianInt)
+      page: 10, startByte: 2, size: 2, type: TigerTagFieldType.bigEndianInt)
   final int nozzleTemperatureMax;
 
   /// DryTemp - Page 11, byte 0, 1 byte
   @TigerTagField(
-      page: 11, startByte: 0, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 11, startByte: 0, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int dryTemp;
 
   /// DryTime - Page 11, byte 1, 1 byte
   @TigerTagField(
-      page: 11, startByte: 1, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 11, startByte: 1, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int dryTime;
 
   /// BedTemperatureMin - Page 11, byte 2, 1 byte
   @TigerTagField(
-      page: 11, startByte: 2, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 11, startByte: 2, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int bedTemperatureMin;
 
   /// BedTemperatureMax - Page 11, byte 3, 1 byte
   @TigerTagField(
-      page: 11, startByte: 3, size: 1, type: TigerTagFieldType.BigEndianInt)
+      page: 11, startByte: 3, size: 1, type: TigerTagFieldType.bigEndianInt)
   final int bedTemperatureMax;
 
   /// Twin Tag Timestamp - Page 12, byte 0, 4 bytes
   @TigerTagField(
-      page: 12, startByte: 0, size: 4, type: TigerTagFieldType.BigEndianInt)
+      page: 12, startByte: 0, size: 4, type: TigerTagFieldType.bigEndianInt)
   final int twinTagTimestamp;
 
   // Color 2 - (RGB) - Page 13, byte 0, 3 bytes
@@ -114,7 +114,7 @@ class TigerTag {
 
   // TD value (Decimal / 10) - Page 15, byte 0, 2 bytes
   @TigerTagField(
-      page: 15, startByte: 0, size: 2, type: TigerTagFieldType.BigEndianInt)
+      page: 15, startByte: 0, size: 2, type: TigerTagFieldType.bigEndianInt)
   final int tdValue;
 
   /// Raw memory bytes from the tag (for debugging/reference)

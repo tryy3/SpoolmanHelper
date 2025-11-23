@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pages/rfid_scanner_page.dart';
 import 'providers/client_provider.dart';
-import 'providers/brand_lookup_provider.dart';
+import 'providers/app_initialization_provider.dart';
 
 void main() {
   runApp(
@@ -19,8 +19,8 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Initialize brand data on app startup
-    final brandsInitAsync = ref.watch(initializeBrandsProvider);
+    // Initialize all app data on startup
+    final appInitAsync = ref.watch(initializeAppProvider);
 
     return MaterialApp(
       title: 'Spoolman Helper',
@@ -32,7 +32,7 @@ class MyApp extends ConsumerWidget {
         ),
         useMaterial3: true,
       ),
-      home: brandsInitAsync.when(
+      home: appInitAsync.when(
         data: (_) => const RfidScannerPage(),
         loading: () => const Scaffold(
           body: Center(
@@ -41,7 +41,7 @@ class MyApp extends ConsumerWidget {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('Loading brand database...'),
+                Text('Initializing app...'),
               ],
             ),
           ),
@@ -54,7 +54,7 @@ class MyApp extends ConsumerWidget {
                 const Icon(Icons.error, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
                 Text(
-                  'Failed to load brand database',
+                  'Failed to initialize app',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
@@ -65,7 +65,7 @@ class MyApp extends ConsumerWidget {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    ref.invalidate(initializeBrandsProvider);
+                    ref.invalidate(initializeAppProvider);
                   },
                   child: const Text('Retry'),
                 ),

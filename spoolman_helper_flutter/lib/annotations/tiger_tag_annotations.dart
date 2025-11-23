@@ -1,5 +1,5 @@
 /// Annotations for TigerTag code generation
-library tiger_tag_annotations;
+library;
 
 /// Marks a class as a TigerTag that should have parsing code generated
 class TigerTagClass {
@@ -43,14 +43,14 @@ class TigerTagField {
 /// Types of data that can be parsed from TigerTag fields
 enum TigerTagFieldType {
   /// Integer value (big-endian)
-  BigEndianInt,
+  bigEndianInt,
 
   /// Little-endian integer value
-  LittleEndianInt,
+  littleEndianInt,
 
   /// Hex string representation
   hexString,
 
-  /// Raw bytes as List<int>
+  /// Raw bytes as List\<int\>
   bytes,
 }

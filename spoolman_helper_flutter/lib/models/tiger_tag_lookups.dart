@@ -2,6 +2,7 @@
 ///
 /// These maps convert TigerTag IDs to human-readable names
 /// based on the TigerTag specification
+library;
 
 /// Material type lookup
 const Map<int, String> materialLookup = {

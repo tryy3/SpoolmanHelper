@@ -21,7 +21,7 @@ extension TigerTagExtensions on TigerTag {
   String get measurementUnit => getMeasurementUnit(measurementID);
 
   /// Get the weight/measurement value with unit
-  String get measurementValueWithUnit => '$measurementValue ${measurementUnit}';
+  String get measurementValueWithUnit => '$measurementValue $measurementUnit';
 
   /// Get nozzle temperature range as string
   String get nozzleTemperatureRange =>
@@ -85,10 +85,6 @@ extension TigerTagExtensions on TigerTag {
     return null;
   }
 
-  /// Get a display name combining brand and material
-  /// Requires brand name to be passed in since brand lookup is dynamic
-  String getDisplayName(String brandName) => '$brandName - $materialName';
-
   /// Check if the tag has valid temperature data
   bool get hasTemperatureData =>
       nozzleTemperatureMin > 0 && nozzleTemperatureMax > 0;
@@ -103,9 +99,10 @@ extension TigerTagExtensions on TigerTag {
   /// Get color hex string for display
   String get colorHex {
     final color = primaryColor;
-    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
-        '${color.green.toRadixString(16).padLeft(2, '0')}'
-        '${color.blue.toRadixString(16).padLeft(2, '0')}';
+    // What the heek is this?
+    return '#${((color.r * 255.0).round() & 0xFF).toRadixString(16).padLeft(2, '0')}'
+        '${((color.g * 255.0).round() & 0xFF).toRadixString(16).padLeft(2, '0')}'
+        '${((color.b * 255.0).round() & 0xFF).toRadixString(16).padLeft(2, '0')}';
   }
 
   /// Format the TigerTag ID as a 3-digit string

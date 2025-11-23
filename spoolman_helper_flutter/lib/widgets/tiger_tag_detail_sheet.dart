@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spoolman_helper_flutter/providers/aspect_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/diameter_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/id_type_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/material_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/measurement_unit_lookup_provider.dart';
 import '../models/tiger_tag.dart';
 import '../models/tiger_tag_extensions.dart';
 import '../providers/brand_lookup_provider.dart';
@@ -31,6 +36,27 @@ class TigerTagDetailSheet extends ConsumerWidget {
     final theme = Theme.of(context);
     final brandName =
         ref.read(brandSyncProvider.notifier).getBrandName(tigerTag.idBrand);
+    final materialName = ref
+        .read(materialSyncProvider.notifier)
+        .getMaterialName(tigerTag.materialID);
+    final firstAspectName = ref
+        .read(aspectSyncProvider.notifier)
+        .getAspectName(tigerTag.firstVisualAspectID);
+    final secondAspectName = ref
+        .read(aspectSyncProvider.notifier)
+        .getAspectName(tigerTag.secondVisualAspectID);
+    final aspectName = '$firstAspectName / $secondAspectName';
+
+    final measurementUnitName = ref
+        .read(measurementUnitSyncProvider.notifier)
+        .getMeasurementUnitName(tigerTag.measurementID);
+
+    final diameterString = ref
+        .read(diameterSyncProvider.notifier)
+        .getDiameterString(tigerTag.diameterID);
+
+    final idTypeString =
+        ref.read(idTypeSyncProvider.notifier).getIdTypeString(tigerTag.idType);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -52,7 +78,8 @@ class TigerTagDetailSheet extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  color:
+                      theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -72,11 +99,12 @@ class TigerTagDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 16),
 
                     // Brand and Material Name
-                    _buildTitle(context, theme, brandName),
+                    _buildTitle(context, theme, brandName, materialName),
                     const SizedBox(height: 24),
 
                     // Main info cards
-                    _buildMainInfoCard(context, theme),
+                    _buildMainInfoCard(context, theme, materialName, aspectName,
+                        measurementUnitName, diameterString),
                     const SizedBox(height: 16),
 
                     // Color display
@@ -84,10 +112,11 @@ class TigerTagDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Type label with arrows
-                    _buildTypeLabel(context, theme),
+                    _buildTypeLabel(context, theme, idTypeString),
                     const SizedBox(height: 8),
 
                     // ID display
+                    // TODO: Change this to "custom message"
                     _buildIdDisplay(context, theme),
                     const SizedBox(height: 24),
 
@@ -97,7 +126,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
                         Expanded(
                           child: _buildNozzleTempCard(context, theme),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: _buildDryingCard(context, theme),
                         ),
@@ -173,7 +202,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
             Text(
               'RFID',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 10,
                 letterSpacing: 2.0,
               ),
@@ -184,10 +213,11 @@ class TigerTagDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildTitle(BuildContext context, ThemeData theme, String brandName) {
+  Widget _buildTitle(BuildContext context, ThemeData theme, String brandName,
+      String materialName) {
     return Center(
       child: Text(
-        tigerTag.getDisplayName(brandName),
+        '$brandName - $materialName test',
         style: theme.textTheme.headlineMedium?.copyWith(
           fontWeight: FontWeight.bold,
         ),
@@ -196,7 +226,13 @@ class TigerTagDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildMainInfoCard(BuildContext context, ThemeData theme) {
+  Widget _buildMainInfoCard(
+      BuildContext context,
+      ThemeData theme,
+      String materialName,
+      String aspectName,
+      String measurementUnitName,
+      String diameterString) {
     return Card(
       elevation: 0,
       color: theme.colorScheme.surfaceContainerHighest,
@@ -206,25 +242,25 @@ class TigerTagDetailSheet extends ConsumerWidget {
           children: [
             _buildInfoRow(
               'Material:',
-              tigerTag.materialName,
+              materialName,
               theme,
             ),
             const SizedBox(height: 12),
             _buildInfoRow(
               'Aspect:',
-              tigerTag.aspectString,
+              aspectName,
               theme,
             ),
             const SizedBox(height: 12),
             _buildInfoRow(
               'Weight:',
-              tigerTag.measurementValueWithUnit,
+              '${tigerTag.measurementValue} $measurementUnitName',
               theme,
             ),
             const SizedBox(height: 12),
             _buildInfoRow(
               'Diameter:',
-              tigerTag.diameterString,
+              diameterString,
               theme,
             ),
           ],
@@ -265,7 +301,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: tigerTag.primaryColor.withOpacity(0.3),
+              color: tigerTag.primaryColor.withValues(alpha: 0.3),
               blurRadius: 12,
               spreadRadius: 2,
             ),
@@ -275,7 +311,8 @@ class TigerTagDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildTypeLabel(BuildContext context, ThemeData theme) {
+  Widget _buildTypeLabel(
+      BuildContext context, ThemeData theme, String idTypeString) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -286,7 +323,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          tigerTag.idTypeString,
+          idTypeString,
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -316,7 +353,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
   Widget _buildNozzleTempCard(BuildContext context, ThemeData theme) {
     return Card(
       elevation: 0,
-      color: theme.colorScheme.errorContainer.withOpacity(0.3),
+      color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -329,9 +366,9 @@ class TigerTagDetailSheet extends ConsumerWidget {
                   color: theme.colorScheme.error,
                   size: 24,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 Text(
-                  'Nozzle Temp.',
+                  'Nozzle',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -351,7 +388,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${tigerTag.nozzleTemperatureMin}°C',
-                      style: theme.textTheme.titleLarge?.copyWith(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -366,7 +403,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${tigerTag.nozzleTemperatureMax}°C',
-                      style: theme.textTheme.titleLarge?.copyWith(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -383,7 +420,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
   Widget _buildDryingCard(BuildContext context, ThemeData theme) {
     return Card(
       elevation: 0,
-      color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -396,7 +433,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
                   color: theme.colorScheme.primary,
                   size: 24,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 Text(
                   'Drying',
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -418,7 +455,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       tigerTag.dryingTemperature,
-                      style: theme.textTheme.titleLarge?.copyWith(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -433,7 +470,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       tigerTag.dryingTime,
-                      style: theme.textTheme.titleLarge?.copyWith(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -450,7 +487,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
   Widget _buildBedTempCard(BuildContext context, ThemeData theme) {
     return Card(
       elevation: 0,
-      color: theme.colorScheme.tertiaryContainer.withOpacity(0.3),
+      color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
