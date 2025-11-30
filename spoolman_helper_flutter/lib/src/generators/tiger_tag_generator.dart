@@ -121,6 +121,12 @@ class TigerTagGenerator extends GeneratorForAnnotation<TigerTagClass> {
           buffer.writeln(
               '    final ${field.name} = List<int>.unmodifiable(${field.name}Bytes);');
           break;
+        case TigerTagFieldType.string:
+          buffer.writeln(
+              '    final ${field.name}Bytes = memory.sublist($byteStart, $byteEnd);');
+          buffer.writeln(
+              '    final ${field.name} = String.fromCharCodes(${field.name}Bytes);');
+          break;
       }
       buffer.writeln('');
     }

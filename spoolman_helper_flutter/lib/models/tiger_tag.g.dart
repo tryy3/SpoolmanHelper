@@ -9,9 +9,9 @@ part of 'tiger_tag.dart';
 /// Generated parse method for TigerTag
 TigerTag? _$parseTigerTag(List<int> memory) {
   try {
-    if (memory.length < 62) {
+    if (memory.length < 96) {
       debugPrint(
-          'TigerTag: Memory too short (${memory.length} bytes, need at least 62)');
+          'TigerTag: Memory too short (${memory.length} bytes, need at least 96)');
       return null;
     }
 
@@ -107,6 +107,10 @@ TigerTag? _$parseTigerTag(List<int> memory) {
     final tdValueBytes = memory.sublist(60, 62);
     final tdValue = _bytesToInt(tdValueBytes, endian: Endian.big);
 
+    // Parse metadata from bytes 64-95 (Page 16, byte 0, 32 bytes)
+    final metadataBytes = memory.sublist(64, 96);
+    final metadata = List<int>.unmodifiable(metadataBytes);
+
     return TigerTag(
       tigerTagID: tigerTagID,
       productID: productID,
@@ -129,6 +133,7 @@ TigerTag? _$parseTigerTag(List<int> memory) {
       color2: color2,
       color3: color3,
       tdValue: tdValue,
+      metadata: metadata,
       rawMemory: List.unmodifiable(memory),
       parsedAt: DateTime.now(),
     );

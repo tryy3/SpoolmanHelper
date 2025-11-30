@@ -107,4 +107,16 @@ extension TigerTagExtensions on TigerTag {
 
   /// Format the TigerTag ID as a 3-digit string
   String get formattedId => tigerTagID.toString().padLeft(3, '0');
+
+  /// Get metadata as a string
+  String get metadataString =>
+      String.fromCharCodes(metadata.takeWhile((b) => b != 0));
+
+  /// Parse spoolId from metadata string
+  /// Expects format: #S-<id> (e.g., "#S-30")
+  /// Returns null if no valid spoolId is found
+  String? get spoolId {
+    final match = RegExp(r'#S-(\d+)').firstMatch(metadataString);
+    return match?.group(1);
+  }
 }

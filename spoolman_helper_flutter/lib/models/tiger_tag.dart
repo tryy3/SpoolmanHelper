@@ -117,6 +117,11 @@ class TigerTag {
       page: 15, startByte: 0, size: 2, type: TigerTagFieldType.bigEndianInt)
   final int tdValue;
 
+  // Metadata (Custom data) - Page 16, byte 0, 32 bytes
+  @TigerTagField(
+      page: 16, startByte: 0, size: 32, type: TigerTagFieldType.bytes)
+  final List<int> metadata;
+
   /// Raw memory bytes from the tag (for debugging/reference)
   final List<int> rawMemory;
 
@@ -145,6 +150,7 @@ class TigerTag {
     required this.color2,
     required this.color3,
     required this.tdValue,
+    required this.metadata,
     required this.rawMemory,
     required this.parsedAt,
   });

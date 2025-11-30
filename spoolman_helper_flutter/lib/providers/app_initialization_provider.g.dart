@@ -53,4 +53,4 @@ final class InitializeAppProvider
   }
 }
 
-String _$initializeAppHash() => r'ff9b4ee3120e03b3cd1078cf404ba1fd96d68efd';
+String _$initializeAppHash() => r'd58f4963af6c93103fbca1f066b7f549984e329d';

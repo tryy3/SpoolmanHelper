@@ -5,9 +5,12 @@ import 'package:spoolman_helper_flutter/providers/diameter_lookup_provider.dart'
 import 'package:spoolman_helper_flutter/providers/id_type_lookup_provider.dart';
 import 'package:spoolman_helper_flutter/providers/material_lookup_provider.dart';
 import 'package:spoolman_helper_flutter/providers/measurement_unit_lookup_provider.dart';
+import 'package:spoolman_helper_flutter/providers/rfid_scanner_provider.dart';
+import '../models/filament_transfer_event.dart';
 import '../models/tiger_tag.dart';
 import '../models/tiger_tag_extensions.dart';
 import '../providers/brand_lookup_provider.dart';
+import '../services/kafka_bridge_service.dart';
 
 /// Show a modal bottom sheet displaying TigerTag details
 Future<void> showTigerTagDetailSheet(
@@ -117,7 +120,7 @@ class TigerTagDetailSheet extends ConsumerWidget {
 
                     // ID display
                     // TODO: Change this to "custom message"
-                    _buildIdDisplay(context, theme),
+                    _buildMetadataDisplay(context, theme),
                     const SizedBox(height: 24),
 
                     // Temperature and Drying info
@@ -141,8 +144,8 @@ class TigerTagDetailSheet extends ConsumerWidget {
 
                     const SizedBox(height: 24),
 
-                    // Action button
-                    _buildActionButton(context, theme),
+                    // Action buttons
+                    _buildActionButtons(context, theme, ref),
                   ],
                 ),
               ),
@@ -338,14 +341,15 @@ class TigerTagDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildIdDisplay(BuildContext context, ThemeData theme) {
+  Widget _buildMetadataDisplay(BuildContext context, ThemeData theme) {
     return Center(
       child: Text(
-        tigerTag.formattedId,
+        tigerTag.metadataString,
         style: theme.textTheme.displayMedium?.copyWith(
           fontWeight: FontWeight.bold,
           fontFamily: 'monospace',
         ),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -551,37 +555,309 @@ class TigerTagDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionButton(BuildContext context, ThemeData theme) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          // TODO: Implement reset functionality
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Reset functionality not yet implemented'),
+  Widget _buildActionButtons(
+      BuildContext context, ThemeData theme, WidgetRef ref) {
+    return Column(
+      children: [
+        // Move Filament Location button
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => _showLocationScanOverlay(context, ref),
+            icon: const Icon(Icons.location_on, size: 24),
+            label: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                'Move Filament Location',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          );
-        },
-        icon: const Icon(Icons.refresh, size: 24),
-        label: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.0),
-          child: Text(
-            'Reset TigerTag',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        const SizedBox(height: 12),
+        // Reset TigerTag button
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              // TODO: Implement reset functionality
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Reset functionality not yet implemented'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.refresh, size: 24),
+            label: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                'Reset TigerTag',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ),
+      ],
+    );
+  }
+
+  /// Show the location scanning overlay dialog
+  Future<void> _showLocationScanOverlay(
+      BuildContext context, WidgetRef ref) async {
+    // Show the scanning dialog
+    final result = await showDialog<LocationScanResult>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => _LocationScanDialog(ref: ref),
+    );
+
+    if (!context.mounted) return;
+
+    // Handle the result
+    if (result != null && result.isSuccess) {
+      // Send filament transfer event to Kafka
+      final kafkaResult = await _sendFilamentTransferEvent(
+        ref,
+        tigerTag,
+        result.locationId!,
+      );
+
+      if (!context.mounted) return;
+
+      if (kafkaResult.success) {
+        await _showResultDialog(
+          context,
+          isSuccess: true,
+          title: 'Transfer Successful',
+          message:
+              'Filament moved to location ${result.locationId}\n\nTransfer event sent to server.',
+        );
+      } else {
+        await _showResultDialog(
+          context,
+          isSuccess: false,
+          title: 'Transfer Failed',
+          message:
+              'Location scanned: ${result.locationId}\n\nFailed to send event:\n${kafkaResult.errorMessage}',
+        );
+      }
+    } else if (result != null && result.isError) {
+      await _showResultDialog(
+        context,
+        isSuccess: false,
+        title: 'Scan Error',
+        message: result.errorMessage ?? 'Unknown error occurred',
+      );
+    }
+    // If cancelled, do nothing - just return to the sheet
+  }
+
+  /// Show a result dialog for success or error
+  Future<void> _showResultDialog(
+    BuildContext context, {
+    required bool isSuccess,
+    required String title,
+    required String message,
+  }) async {
+    final theme = Theme.of(context);
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: Icon(
+          isSuccess ? Icons.check_circle : Icons.error,
+          size: 48,
+          color: isSuccess ? Colors.green : Colors.red,
+        ),
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium,
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isSuccess ? Colors.green : Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('OK'),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Build and send filament transfer event to Kafka
+  Future<KafkaEventResult> _sendFilamentTransferEvent(
+    WidgetRef ref,
+    TigerTag tigerTag,
+    String locationId,
+  ) async {
+    // Get lookup data from providers
+    final brandName =
+        ref.read(brandSyncProvider.notifier).getBrandName(tigerTag.idBrand);
+    final materialName = ref
+        .read(materialSyncProvider.notifier)
+        .getMaterialName(tigerTag.materialID);
+    final diameterString = ref
+        .read(diameterSyncProvider.notifier)
+        .getDiameterString(tigerTag.diameterID);
+
+    // Parse spoolId from metadata
+    final spoolId = tigerTag.spoolId;
+    if (spoolId == null) {
+      return KafkaEventResult.error(
+        'No spoolId found in TigerTag metadata (expected #S-<id> format)',
+      );
+    }
+
+    // Parse diameter value from string (e.g., "1.75 mm" -> 1.75)
+    final diameterMatch = RegExp(r'(\d+\.?\d*)').firstMatch(diameterString);
+    final diameter = diameterMatch != null
+        ? double.tryParse(diameterMatch.group(1)!) ?? 1.75
+        : 1.75;
+
+    // Build the filament transfer event
+    final event = FilamentTransferEvent(
+      spoolId: spoolId,
+      locationId: locationId,
+      timestamp: DateTime.now(),
+      tagData: FilamentTagData(
+        id: tigerTag.tigerTagID.toString(),
+        name: '$brandName - $materialName',
+        material: materialName,
+        color: tigerTag.colorHex,
+        temperature: TemperatureInfo(
+          nozzle: tigerTag.nozzleTemperatureMax,
+          bed: tigerTag.bedTemperatureMax,
+        ),
+        diameter: diameter,
+        weight: tigerTag.measurementValue,
+      ),
+    );
+
+    // Send to Kafka
+    return KafkaBridgeService().sendFilamentTransferEvent(event);
+  }
+}
+
+/// Dialog widget for location tag scanning
+class _LocationScanDialog extends ConsumerStatefulWidget {
+  final WidgetRef ref;
+
+  const _LocationScanDialog({required this.ref});
+
+  @override
+  ConsumerState<_LocationScanDialog> createState() =>
+      _LocationScanDialogState();
+}
+
+class _LocationScanDialogState extends ConsumerState<_LocationScanDialog> {
+  bool _isScanning = false;
+  String? _statusMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _startScanning();
+  }
+
+  Future<void> _startScanning() async {
+    setState(() {
+      _isScanning = true;
+      _statusMessage = 'Hold your phone near the location tag...';
+    });
+
+    final result =
+        await widget.ref.read(rfidScannerProvider.notifier).scanLocationTag();
+
+    if (!mounted) return;
+
+    // Return the result to the parent
+    Navigator.of(context).pop(result);
+  }
+
+  Future<void> _cancelScanning() async {
+    await widget.ref.read(rfidScannerProvider.notifier).cancelLocationScan();
+    if (!mounted) return;
+    Navigator.of(context).pop(LocationScanResult.cancelled());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(
+            Icons.nfc,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 12),
+          const Text('Scan Location Tag'),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_isScanning) ...[
+            const SizedBox(height: 16),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 24),
+          ],
+          Text(
+            _statusMessage ?? 'Preparing scanner...',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Make sure to scan a location tag, not a filament tag.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: _cancelScanning,
+          child: const Text('Cancel'),
+        ),
+      ],
     );
   }
 }

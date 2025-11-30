@@ -51,6 +51,9 @@ enum TigerTagFieldType {
   /// Hex string representation
   hexString,
 
+  /// String
+  string,
+
   /// Raw bytes as List\<int\>
   bytes,
 }

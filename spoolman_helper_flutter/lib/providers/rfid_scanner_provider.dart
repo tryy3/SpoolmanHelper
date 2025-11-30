@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'package:nfc_manager/nfc_manager_android.dart';
@@ -6,6 +8,32 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/tiger_tag.dart';
 
 part 'rfid_scanner_provider.g.dart';
+
+/// Result class for location tag scanning
+@immutable
+class LocationScanResult {
+  final String? locationId;
+  final String? errorMessage;
+  final bool wasCancelled;
+
+  const LocationScanResult({
+    this.locationId,
+    this.errorMessage,
+    this.wasCancelled = false,
+  });
+
+  bool get isSuccess => locationId != null;
+  bool get isError => errorMessage != null && !wasCancelled;
+
+  factory LocationScanResult.success(String locationId) =>
+      LocationScanResult(locationId: locationId);
+
+  factory LocationScanResult.error(String message) =>
+      LocationScanResult(errorMessage: message);
+
+  factory LocationScanResult.cancelled() =>
+      const LocationScanResult(wasCancelled: true);
+}
 
 /// Represents the current state of the RFID scanner
 enum RfidScannerStatus {
@@ -131,7 +159,7 @@ class RfidScanner extends _$RfidScanner {
         pollingOptions: {NfcPollingOption.iso14443},
         onDiscovered: (NfcTag tag) async {
           debugPrint("tag discovered: $tag");
-          _handleTagDiscovered(tag);
+          await _handleTagDiscovered(tag);
           debugPrint("Foobar");
         },
       );
@@ -161,7 +189,7 @@ class RfidScanner extends _$RfidScanner {
   }
 
   /// Handle discovered NFC tag - Focus on reading raw TigerTag data
-  void _handleTagDiscovered(NfcTag tag) async {
+  Future<void> _handleTagDiscovered(NfcTag tag) async {
     try {
       debugPrint('=== TigerTag Discovered ===');
 
@@ -178,7 +206,16 @@ class RfidScanner extends _$RfidScanner {
 
       debugPrint('Read ${rawMemory.length} bytes from MIFARE Ultralight');
 
+      // Capture tag info that might require active session
+      final mifareType = mifareUltraLight.type;
+      final isNdef = Ndef.from(tag) != null;
+
+      // Stop scanning immediately after successful read
+      await stopScanning();
+
       // Parse TigerTag from raw memory
+      // 51695873
+      // 1542820452
       final tigerTag = TigerTag.parse(rawMemory);
       if (tigerTag == null) {
         throw Exception('Failed to parse TigerTag data');
@@ -190,7 +227,7 @@ class RfidScanner extends _$RfidScanner {
       String uid = 'Unknown';
       final tagType = 'MIFARE Ultralight';
       final tagInfo = <String, dynamic>{
-        'mifare_type': mifareUltraLight.type.toString(),
+        'mifare_type': mifareType.toString(),
         'memory_size': rawMemory.length,
       };
 
@@ -202,8 +239,7 @@ class RfidScanner extends _$RfidScanner {
       }
 
       // Check for NDEF (optional, TigerTag might not use it)
-      final ndef = Ndef.from(tag);
-      if (ndef != null) {
+      if (isNdef) {
         debugPrint(
             'NDEF support detected (but TigerTag uses proprietary format)');
         tagInfo['ndef_available'] = true;
@@ -231,7 +267,6 @@ class RfidScanner extends _$RfidScanner {
       debugPrint(
           'TigerTag successfully processed: UID=$uid, ID=${tigerTag.tigerTagID}');
       debugPrint("Foo");
-      stopScanning();
     } catch (e, stackTrace) {
       debugPrint('Error handling tag: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -280,5 +315,108 @@ class RfidScanner extends _$RfidScanner {
   /// Clear error message
   void clearError() {
     state = state.copyWith(errorMessage: null);
+  }
+
+  // Completer for location tag scanning (Future-based approach)
+  Completer<LocationScanResult>? _locationScanCompleter;
+
+  /// Scan for a location tag (NDEF format with #s-location-<id>)
+  /// Returns LocationScanResult with the location ID on success,
+  /// error message on failure, or cancelled flag if cancelled.
+  Future<LocationScanResult> scanLocationTag() async {
+    if (!state.isNfcAvailable) {
+      return LocationScanResult.error('NFC is not available on this device');
+    }
+
+    // Cancel any existing location scan
+    if (_locationScanCompleter != null &&
+        !_locationScanCompleter!.isCompleted) {
+      _locationScanCompleter!.complete(LocationScanResult.cancelled());
+    }
+
+    _locationScanCompleter = Completer<LocationScanResult>();
+
+    try {
+      await NfcManager.instance.startSession(
+        pollingOptions: {NfcPollingOption.iso14443},
+        onDiscovered: (NfcTag tag) async {
+          await _handleLocationTagDiscovered(tag);
+        },
+      );
+    } catch (e) {
+      debugPrint('Error starting location scan session: $e');
+      if (!_locationScanCompleter!.isCompleted) {
+        _locationScanCompleter!.complete(
+          LocationScanResult.error('Failed to start scanning: $e'),
+        );
+      }
+    }
+
+    return _locationScanCompleter!.future;
+  }
+
+  /// Cancel the current location tag scan
+  Future<void> cancelLocationScan() async {
+    try {
+      await NfcManager.instance.stopSession();
+    } catch (e) {
+      debugPrint('Error stopping location scan session: $e');
+    }
+
+    if (_locationScanCompleter != null &&
+        !_locationScanCompleter!.isCompleted) {
+      _locationScanCompleter!.complete(LocationScanResult.cancelled());
+    }
+    _locationScanCompleter = null;
+  }
+
+  /// Handle discovered tag during location scanning
+  Future<void> _handleLocationTagDiscovered(NfcTag tag) async {
+    try {
+      debugPrint('=== Location Tag Scan: Tag Discovered ===');
+
+      // Try to read as NDEF
+      final ndef = Ndef.from(tag);
+      if (ndef == null) {
+        debugPrint('Tag does not support NDEF');
+        // Don't stop - let user try again with correct tag
+        return;
+      }
+
+      final message = ndef.cachedMessage;
+      if (message == null || message.records.isEmpty) {
+        debugPrint('No NDEF message or records on tag');
+        return;
+      }
+
+      // Read the first record's payload
+      final payload = String.fromCharCodes(message.records[0].payload);
+      debugPrint('NDEF payload: $payload');
+
+      // Parse location ID using regex
+      // The payload may have some leading bytes, so we search for the pattern
+      final match = RegExp(r'#s-location-(\d+)').firstMatch(payload);
+      if (match == null) {
+        debugPrint('Payload does not contain valid location format');
+        return;
+      }
+
+      final locationId = match.group(1)!;
+      debugPrint('Successfully parsed location ID: $locationId');
+
+      // Stop the NFC session
+      await NfcManager.instance.stopSession();
+
+      // Complete with success
+      if (_locationScanCompleter != null &&
+          !_locationScanCompleter!.isCompleted) {
+        _locationScanCompleter!
+            .complete(LocationScanResult.success(locationId));
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error handling location tag: $e');
+      debugPrint('Stack trace: $stackTrace');
+      // Don't complete on error - let user try again
+    }
   }
 }
