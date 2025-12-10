@@ -1,3 +1,6 @@
 [submodule "SpoolmanInventoryService"]
 	path = SpoolmanInventoryService
 	url = git@github.com:tryy3/SpoolmanInventoryService.git
+[submodule "SpoolmanLookupService"]
+	path = SpoolmanLookupService
+	url = git@github.com:tryy3/SpoolmanLookupService.git
