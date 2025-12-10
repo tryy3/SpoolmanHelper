@@ -1,0 +1,45 @@
+meta {
+  name: Send Initiated Event
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/topics/3dprinter-filament-transfer-initiated
+  body: json
+  auth: inherit
+}
+
+params:query {
+  ~async: 
+}
+
+headers {
+  Content-Type: application/vnd.kafka.json.v2+json
+}
+
+body:json {
+  {
+    "records": [
+      {
+        "value": {
+          "spoolId": "30",
+          "locationId": "Utanför",
+          "timestamp": "2025-11-30T16:28:01.460824Z",
+          "tagData": {
+            "id": "1542820452",
+            "name": "Bambu Lab - PLA",
+            "material": "PLA",
+            "color": "#f44336",
+            "temperature": {
+              "nozzle": 240,
+              "bed": 55
+            },
+            "diameter": 1.75,
+            "weight": 1000
+          }
+        }
+      }
+    ]
+  }
+}

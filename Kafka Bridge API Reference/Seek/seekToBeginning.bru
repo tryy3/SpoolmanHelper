@@ -1,0 +1,11 @@
+meta {
+  name: seekToBeginning
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/consumers/:groupid/instances/:name/positions/beginning
+  body: none
+  auth: inherit
+}

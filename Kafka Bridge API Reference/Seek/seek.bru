@@ -1,0 +1,11 @@
+meta {
+  name: seek
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/consumers/:groupid/instances/:name/positions
+  body: none
+  auth: inherit
+}

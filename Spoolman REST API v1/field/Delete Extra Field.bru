@@ -1,0 +1,16 @@
+meta {
+  name: Delete Extra Field
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/field/:entity_type/:key
+  body: none
+  auth: inherit
+}
+
+params:path {
+  entity_type: 
+  key: 
+}

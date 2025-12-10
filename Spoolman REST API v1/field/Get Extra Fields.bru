@@ -1,0 +1,15 @@
+meta {
+  name: Get Extra Fields
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/field/:entity_type
+  body: none
+  auth: inherit
+}
+
+params:path {
+  entity_type: 
+}

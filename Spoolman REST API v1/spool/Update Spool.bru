@@ -1,0 +1,33 @@
+meta {
+  name: Update Spool
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/spool/:spool_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  spool_id: 
+}
+
+body:json {
+  {
+    "first_used": "",
+    "last_used": "",
+    "filament_id": "",
+    "price": "",
+    "initial_weight": "",
+    "spool_weight": "",
+    "remaining_weight": "",
+    "used_weight": "",
+    "location": "",
+    "lot_nr": "",
+    "comment": "",
+    "archived": false,
+    "extra": ""
+  }
+}

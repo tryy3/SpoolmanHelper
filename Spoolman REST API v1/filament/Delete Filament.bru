@@ -1,0 +1,15 @@
+meta {
+  name: Delete Filament
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/filament/:filament_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  filament_id: 
+}

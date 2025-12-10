@@ -1,0 +1,16 @@
+meta {
+  name: unsubscribe
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/consumers/:groupid/instances/:name/subscription
+  body: none
+  auth: inherit
+}
+
+params:path {
+  groupid: 
+  name: 
+}

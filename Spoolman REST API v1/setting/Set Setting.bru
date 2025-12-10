@@ -1,0 +1,15 @@
+meta {
+  name: Set Setting
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/setting/:key
+  body: json
+  auth: inherit
+}
+
+params:path {
+  key: 
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Add Spool
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/spool
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "first_used": "",
+    "last_used": "",
+    "filament_id": 0,
+    "price": "",
+    "initial_weight": "",
+    "spool_weight": "",
+    "remaining_weight": "",
+    "used_weight": "",
+    "location": "",
+    "lot_nr": "",
+    "comment": "",
+    "archived": false,
+    "extra": ""
+  }
+}

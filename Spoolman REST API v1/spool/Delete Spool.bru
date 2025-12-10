@@ -1,0 +1,15 @@
+meta {
+  name: Delete Spool
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/spool/:spool_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  spool_id: 
+}

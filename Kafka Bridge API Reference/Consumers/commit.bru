@@ -1,0 +1,11 @@
+meta {
+  name: commit
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/consumers/:groupid/instances/:name/offsets
+  body: none
+  auth: inherit
+}

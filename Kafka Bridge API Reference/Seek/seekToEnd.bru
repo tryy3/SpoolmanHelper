@@ -1,0 +1,11 @@
+meta {
+  name: seekToEnd
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/consumers/:groupid/instances/:name/positions/end
+  body: none
+  auth: inherit
+}

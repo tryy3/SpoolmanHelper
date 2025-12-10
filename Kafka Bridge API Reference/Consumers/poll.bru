@@ -1,0 +1,11 @@
+meta {
+  name: poll
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/consumers/:groupid/instances/:name/records
+  body: none
+  auth: inherit
+}

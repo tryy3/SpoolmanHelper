@@ -1,0 +1,15 @@
+meta {
+  name: send
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/topics/:topicname
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~async: 
+}

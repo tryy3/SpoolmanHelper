@@ -1,0 +1,16 @@
+meta {
+  name: subscribe
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/consumers/:groupid/instances/:name/subscription
+  body: none
+  auth: inherit
+}
+
+params:path {
+  groupid: 
+  name: 
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Delete Vendor
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/vendor/:vendor_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  vendor_id: 
+}

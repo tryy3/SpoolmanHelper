@@ -1,0 +1,11 @@
+meta {
+  name: listPartitions
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/topics/:topicname/partitions
+  body: none
+  auth: inherit
+}

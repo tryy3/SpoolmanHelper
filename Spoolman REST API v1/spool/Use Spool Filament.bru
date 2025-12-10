@@ -1,0 +1,22 @@
+meta {
+  name: Use Spool Filament
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/spool/:spool_id/use
+  body: json
+  auth: inherit
+}
+
+params:path {
+  spool_id: 
+}
+
+body:json {
+  {
+    "use_length": "",
+    "use_weight": ""
+  }
+}

@@ -1,0 +1,37 @@
+meta {
+  name: Update Filament
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/filament/:filament_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  filament_id: 
+}
+
+body:json {
+  {
+    "name": "",
+    "vendor_id": "",
+    "material": "",
+    "price": "",
+    "density": "",
+    "diameter": "",
+    "weight": "",
+    "spool_weight": "",
+    "article_number": "",
+    "comment": "",
+    "settings_extruder_temp": "",
+    "settings_bed_temp": "",
+    "color_hex": "",
+    "multi_color_hexes": "",
+    "multi_color_direction": "",
+    "external_id": "",
+    "extra": ""
+  }
+}

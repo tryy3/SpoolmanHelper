@@ -1,0 +1,15 @@
+meta {
+  name: Get Filament
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/filament/:filament_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  filament_id: 
+}

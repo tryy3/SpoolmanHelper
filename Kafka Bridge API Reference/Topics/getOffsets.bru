@@ -1,0 +1,11 @@
+meta {
+  name: getOffsets
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/topics/:topicname/partitions/:partitionid/offsets
+  body: none
+  auth: inherit
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Find Spool
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/spool?filament_id=52
+  body: none
+  auth: inherit
+}
+
+params:query {
+  filament_id: 52
+  ~filament_name: 
+  ~filament_material: 
+  ~vendor_name: 
+  ~vendor_id: 
+  ~filament.name: 
+  ~filament.id: 
+  ~filament.material: 
+  ~filament.vendor.name: 
+  ~filament.vendor.id: 
+  ~location: 
+  ~lot_nr: 
+  ~allow_archived: 
+  ~sort: 
+  ~limit: 
+  ~offset: 
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Find Vendor
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/vendor
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~name: 
+  ~external_id: 
+  ~sort: 
+  ~limit: 
+  ~offset: 
+}

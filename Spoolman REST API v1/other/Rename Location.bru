@@ -1,0 +1,21 @@
+meta {
+  name: Rename Location
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/location/:location
+  body: json
+  auth: inherit
+}
+
+params:path {
+  location: 
+}
+
+body:json {
+  {
+    "name": ""
+  }
+}

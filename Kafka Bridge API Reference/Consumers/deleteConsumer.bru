@@ -1,0 +1,11 @@
+meta {
+  name: deleteConsumer
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/consumers/:groupid/instances/:name
+  body: none
+  auth: inherit
+}

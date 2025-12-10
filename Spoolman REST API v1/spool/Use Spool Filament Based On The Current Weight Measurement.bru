@@ -1,0 +1,21 @@
+meta {
+  name: Use Spool Filament Based On The Current Weight Measurement
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/spool/:spool_id/measure
+  body: json
+  auth: inherit
+}
+
+params:path {
+  spool_id: 
+}
+
+body:json {
+  {
+    "weight": ""
+  }
+}

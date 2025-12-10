@@ -1,0 +1,25 @@
+meta {
+  name: Update Vendor
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/vendor/:vendor_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  vendor_id: 
+}
+
+body:json {
+  {
+    "name": "",
+    "comment": "",
+    "empty_spool_weight": "",
+    "external_id": "",
+    "extra": ""
+  }
+}

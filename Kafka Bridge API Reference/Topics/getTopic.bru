@@ -1,0 +1,11 @@
+meta {
+  name: getTopic
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/topics/:topicname
+  body: none
+  auth: inherit
+}

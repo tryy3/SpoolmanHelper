@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Spoolman Helper",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

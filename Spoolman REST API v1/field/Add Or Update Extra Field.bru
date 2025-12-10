@@ -1,0 +1,28 @@
+meta {
+  name: Add Or Update Extra Field
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/field/:entity_type/:key
+  body: json
+  auth: inherit
+}
+
+params:path {
+  entity_type: 
+  key: 
+}
+
+body:json {
+  {
+    "name": "",
+    "order": 0,
+    "unit": "",
+    "field_type": "",
+    "default_value": "",
+    "choices": "",
+    "multi_choice": ""
+  }
+}

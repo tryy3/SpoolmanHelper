@@ -1,0 +1,27 @@
+meta {
+  name: Find Filaments
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/filament
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~vendor_name: 
+  ~vendor_id: 
+  ~vendor.name: 
+  ~vendor.id: 
+  ~name: 
+  ~material: 
+  ~article_number: 
+  ~color_hex: 
+  ~color_similarity_threshold: 
+  ~external_id: 
+  ~sort: 
+  ~limit: 
+  ~offset: 
+}
